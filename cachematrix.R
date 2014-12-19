@@ -12,7 +12,7 @@
 ## to create a matrix, use the function makeCacheMatrix passing as argument a valid square matrix
 
 ## 1) create a square matrix
-## M < matrix(sample(16),4,4)
+## M <- matrix(sample(16),4,4)
 
 ## 2) use makeCacheMatrix to create the special matrix
 ## MAT <- makeCacheMatrix(M)
@@ -31,21 +31,28 @@
 ## the size of the matrix can be handled by the computer...  i.e.  dont give a 100000000000 x 100000000000 and 
 ## hope to get a result
 
+## Tests:
+## tested with matrices that can be visually inspected i.e. M[4x4] inv(M) and inv(inv(M)) should be equal to M
+## for bigger matrices, they were compared with all.equal(M1,M2)... this is a good testting fuction beause it tests 
+## for near equality.
+## tested with 100x100 mat... no noticeable difference when calculating the inverse vs cached inverse
+## tested with 1000 x 1000 mat.    noticeable difference when calculating the inverse vs cached inverse
+## 
 
 
 ## Function name: makeCacheMatrix
 ## Function receives as an argument a square matrix; the matrix has an inverse.
 
 makeCacheMatrix <- function(x = matrix()) {
-  m <- NULL
-  set <- function(y) {
+  m <- NULL                     # reset to NULL every time makeChacheMatrix is called
+  set <- function(y) {          # define what will 'set' do 
     x <<- y
     m <<- NULL
   }
-  get <- function() { x }
-  setInv <- function(inverse) { m <<- inverse }
-  getInv <- function() { m }
-  list(set = set, get = get,
+  get <- function() { x }       # define what will 'get' do
+  setInv <- function(inverse) { m <<- inverse } # calculate the inverse when called the first time 
+  getInv <- function() { m }                    # return the cached value
+  list(set = set, get = get,                    # define the functions that can access the object just created
        setInv = setInv,
        getInv = getInv)
 }
@@ -58,15 +65,14 @@ makeCacheMatrix <- function(x = matrix()) {
 
 cacheSolve <- function(x, ...) {
         ## Return a matrix that is the inverse of 'x'
-  m <- x$getInv()
-  if(!is.null(m)) {
-    message("getting cached data")
-    return(m)
+  m <- x$getInv()              # access the object x with the function defined to access the object when created
+  if(!is.null(m)) {            # if not null (i.e. its not the first time calling get, then return the cached inverse)
+    message("getting cached data")  # print message to alert that cached data is being returned
   }
-  else {
-    data <- x$get()
-    m <- solve(data)
+  else {                       # if null then its the first time inverse is being called and need to caculate
+    data <- x$get()            # the inverse of the matrix: put matrix into temp variable 'data'
+    m <- solve(data)           # calculate the inverse with solve and store it in m
     x$setInv(m)
-    m
   }
+  return(m)                    # at this point m has the correct value cached or calculated so just return m
 }
